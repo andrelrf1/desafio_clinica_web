@@ -2,15 +2,14 @@
 
 import * as React from "react";
 import {useRouter} from "next/navigation";
-import Avatar from "@mui/material/Avatar";
+import Image from "next/image";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
-import { API_ROUTES } from "@/app/lib/config";
+import {AuthController} from "@/app/controllers/auth-controller";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -26,47 +25,8 @@ export default function LoginPage() {
         const email = (data.get("email") || "").toString().trim();
         const password = (data.get("password") || "").toString();
 
-        if (!email || !password) {
-            setError("Informe e-mail e senha.");
-            setLoading(false);
-            return;
-        }
-
         try {
-            const resp = await fetch(API_ROUTES.login, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({email, password}),
-            });
-
-            if (!resp.ok) {
-                let detail = "Falha no login. Verifique suas credenciais.";
-                try {
-                    const errJson = await resp.json();
-                    if (errJson?.message) detail = errJson.message;
-                    else if (errJson?.detail) detail = errJson.detail;
-                } catch (_) {
-                }
-                throw new Error(detail);
-            }
-
-            const json = await resp.json();
-            const userEmail = json?.user?.email || email;
-            const userId = json?.user?.id;
-            const access = json?.tokens?.access;
-            const refresh = json?.tokens?.refresh;
-
-            try {
-                if (userEmail) localStorage.setItem("patient_email", userEmail);
-                if (typeof userId !== "undefined" && userId !== null) localStorage.setItem("user_id", String(userId));
-                if (access) localStorage.setItem("jwt_access", access);
-                if (refresh) localStorage.setItem("jwt_refresh", refresh);
-            } catch (e) {
-                console.error("Falha ao salvar sessão:", e);
-            }
-
+            await AuthController.login({email, password});
             router.push("/agendamentos");
         } catch (e: unknown) {
             setError(e instanceof Error ? e.message : "Erro inesperado ao efetuar login.");
@@ -87,14 +47,15 @@ export default function LoginPage() {
             >
                 <Paper elevation={6} sx={{p: 4, width: "100%"}}>
                     <Box sx={{display: "flex", flexDirection: "column", alignItems: "center", mb: 2}}>
-                        <Avatar sx={{m: 1, bgcolor: "primary.main", width: 56, height: 56}}>
-                            <Typography variant="h6" component="span" color="inherit">
-                                🏥
-                            </Typography>
-                        </Avatar>
-                        <Typography component="h1" variant="h5">
-                            Clinica Desafio
-                        </Typography>
+                        <Box sx={{ mb: 2, width: "100%", maxWidth: 200, height: 60, position: "relative" }}>
+                            <Image
+                                src="/logo_horizontal.png"
+                                alt="Logo Clínica Desafio"
+                                fill
+                                style={{ objectFit: "contain" }}
+                                priority
+                            />
+                        </Box>
                     </Box>
 
                     <Box component="form" onSubmit={handleSubmit} noValidate>

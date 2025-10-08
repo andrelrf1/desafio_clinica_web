@@ -5,12 +5,11 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
-  const router = useRouter();
   const pathname = usePathname();
-  const [hasSession, setHasSession] = React.useState<boolean>(false);
+  const [, setHasSession] = React.useState<boolean>(false);
 
   React.useEffect(() => {
     try {
